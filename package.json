@@ -15,6 +15,7 @@
   },
   "devDependencies": {
     "compression": "^1.8.0",
+    "dotenv": "^16.4.7",
     "helmer": "^0.0.1",
     "helmet": "^8.0.0",
     "mongoose": "^8.12.1",
