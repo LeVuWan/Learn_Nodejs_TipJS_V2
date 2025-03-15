@@ -1,0 +1,23 @@
+{
+  "name": "learn_nodejs_tipjs",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "compression": "^1.8.0",
+    "helmer": "^0.0.1",
+    "helmet": "^8.0.0",
+    "mongoose": "^8.12.1",
+    "morgan": "^1.10.0"
+  }
+}
