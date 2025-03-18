@@ -1,0 +1,2 @@
+##Signup
+POST http://localhost:8001/v1/api/shop/signup
