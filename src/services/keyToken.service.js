@@ -17,7 +17,6 @@ class KeyTokenService {
     }
 
     static findByUserId = async (userId) => {
-        console.log("Check userId: ", userId);
         
         return await keyTokenSchema.findOne({ user: userId })
     }
@@ -36,12 +35,7 @@ class KeyTokenService {
     }
 
     static deleteKey = async ({ userId }) => {
-        console.log("Check userId in deleteKey: ", userId);
         const result = await keyTokenSchema.deleteOne({ user: userId });
-        if (result.deletedCount === 0) {
-            console.log(`Không tìm thấy token nào cho userId: ${userId}`);
-            return { message: "Không có dữ liệu nào để xóa", success: false };
-        }
         return result;
     };
 }

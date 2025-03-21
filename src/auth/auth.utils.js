@@ -43,7 +43,6 @@ const authentication = acyncHandle(async (req, res, next) => {
 
     const keyStore = await findByUserId(userId);
 
-
     if (!keyStore) {
         throw new AuthFailureError("Invalid Request")
     }
@@ -55,7 +54,6 @@ const authentication = acyncHandle(async (req, res, next) => {
             if (userId !== decodeUser.userId) {
                 throw AuthFailureError("Invalid UserId")
             }
-
             req.keyStore = keyStore;
             req.user = decodeUser;
             req.refreshToken = refreshToken;
@@ -72,12 +70,10 @@ const authentication = acyncHandle(async (req, res, next) => {
         const decodeUser = JWT.verify(accessToken, keyStore.publicKey, { algorithms: ["RS256"] });
 
         if (userId != decodeUser.userId) throw AuthFailureError("Invalid UserId")
-
+        req.user = decodeUser;
         req.keyStore = keyStore;
         return next()
     } catch (error) {
-        console.log("Check error: ", error);
-
         throw error
     }
 })
