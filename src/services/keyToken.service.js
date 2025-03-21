@@ -17,7 +17,9 @@ class KeyTokenService {
     }
 
     static findByUserId = async (userId) => {
-        return await keyTokenSchema.findOne({ user: userId }).lean()
+        console.log("Check userId: ", userId);
+        
+        return await keyTokenSchema.findOne({ user: userId })
     }
 
     static removeById = async (id) => {

@@ -136,52 +136,50 @@ class AccessService {
         }
     }
 
-    static handleRefreshToken = async ({ refreshToken }) => {
+    static handleRefreshToken = async ({ keyStore, decodeUser, refreshToken }) => {
         try {
-            const foundToken = await KeyTokenService.findByRefreshTokenUsed({ refreshToken: refreshToken });
-            if (foundToken) {
-                const { userId, email } = await verifyJWT(refreshToken, foundToken.publicKey);
-                await KeyTokenService.deleteKey({ userId: userId });
-                throw new ForbiddenError("Something wrong happend !! Pls relogin")
+            const refreshTokensUsedSet = new Set(keyStore.refreshTokensUsed);
+            if (refreshTokensUsedSet.has(refreshToken)) {
+                await KeyTokenService.deleteKey({ userId: decodeUser.userId });
+                throw new ForbiddenError("Invalid refresh token! Please relogin.");
             }
 
-            const holderKey = await KeyTokenService.findKeyByRefreshToken({ refreshToken: refreshToken });
-            if (!holderKey) {
-                throw new BadRequestError("Shop not register #1")
+            if (keyStore.refreshToken !== refreshToken) {
+                throw new ForbiddenError("Invalid refresh token! Please log in again.");
             }
 
-            const { userId, email } = await verifyJWT(refreshToken, holderKey.publicKey);
-
-            console.log(`Check userId ${userId}, ${email} #2`);
-
-            const foundShop = await findByEmail({ email: email });
-
+            const foundShop = await findByEmail({ email: decodeUser.email });
             if (!foundShop) {
-                throw new BadRequestError("Shop not register #2")
+                throw new BadRequestError("Shop not registered.");
             }
 
-            const tokens = await createTokenPair({ userId, email }, holderKey.publicKey, holderKey.privateKey);
+            const tokens = await createTokenPair(
+                { userId: decodeUser.userId, email: decodeUser.email },
+                keyStore.publicKey,
+                keyStore.privateKey
+            );
 
-            holderKey.refreshTokensUsed.push(refreshToken);
+            const foundKey = await KeyTokenService.findByUserId(decodeUser.userId);
 
-            holderKey.refreshToken = tokens.refreshToken;
-            await holderKey.save()
+            foundKey.refreshTokensUsed.push(refreshToken);
+            foundKey.refreshToken = tokens.refreshToken;
 
+            await foundKey.save();
             return {
                 metadata: {
-                    shop: getInfoData({ fileds: ['_id', 'name', 'email'], object: foundShop }),
-                    tokens
-                }
-            }
+                    shop: getInfoData({ fields: ['_id', 'name', 'email'], object: foundShop }),
+                    tokens,
+                },
+            };
         } catch (error) {
-            console.log("Check error: ", error);
+            console.error("Error in handleRefreshToken:", error);
             return {
                 code: "xxx",
                 message: error.message,
                 status: "error",
             };
         }
-    }
+    };
 }
 
 module.exports = AccessService;

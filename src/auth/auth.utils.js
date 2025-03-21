@@ -26,7 +26,6 @@ const createTokenPair = async (payload, publicKey, privateKey) => {
         try {
             const decoded = JWT.verify(accessToken, publicKey, { algorithms: ["RS256"] });
             console.log("Check decoded: ", decoded);
-
         } catch (err) {
             console.error("Error verifying token:", err.message);
         }
