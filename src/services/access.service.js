@@ -25,7 +25,7 @@ class AccessService {
 
             const match = await bcrypt.compare(password.toString(), foundShop.password);
 
-            if (!match) {
+            if (!match) {                
                 throw new AuthFailureError("Authentication error")
             }
 

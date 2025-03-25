@@ -10,6 +10,8 @@ class AccessController {
   };
 
   login = async (req, res, next) => {
+    console.log("Check in controller");
+
     const result = await AccessService.login(req.body);
     new SuccessRespone({
       metadata: result,

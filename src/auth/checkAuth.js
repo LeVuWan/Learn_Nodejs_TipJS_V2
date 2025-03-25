@@ -1,6 +1,4 @@
-const apiKeyModel = require("../models/apiKey.model");
 const { findById } = require("../services/apiKey.service");
-const crypto = require("crypto");
 
 const HEADER = {
     API_KEY: "x-api-key",
@@ -9,13 +7,8 @@ const HEADER = {
 
 const apiKey = async (req, res, next) => {
     try {
-        // const newApiKey = await apiKeyModel.create({
-        //     key: crypto.randomBytes(64).toString("hex"),
-        //     permissions: ["0000"],
-        // })
-        // console.log("Check newApiKey: ", newApiKey);
-
         const key = req.headers[HEADER.API_KEY]?.toString();
+
         if (!key) {
             return res.status(403).json({
                 message: "Forbidden Error"

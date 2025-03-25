@@ -4,6 +4,35 @@ const getInfoData = ({ fileds = [], object = {} }) => {
     return _.pick(object, fileds)
 }
 
+const getSelectData = (select = []) => {
+    return Object.fromEntries(select.map(el => [el, 1]));
+};
+
+const unGetSelectData = (select = []) => {
+    if (typeof select === "string") {
+        select = select.split(",");
+    }
+
+    return Object.fromEntries(select.map(el => [el, 0]));
+}
+
+const removeUndefinedObject = obj => {
+    Object.keys(obj).forEach(k => {
+        if (obj[k] == null || obj[k] == undefined) {
+            delete obj[k]
+        }
+    })
+    return obj
+}
+
+const updateNestedObjectParser = obj => {
+
+}
+
+
 module.exports = {
-    getInfoData
+    getInfoData,
+    getSelectData,
+    unGetSelectData,
+    removeUndefinedObject
 }
