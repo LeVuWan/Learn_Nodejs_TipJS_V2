@@ -74,6 +74,7 @@ const authentication = acyncHandle(async (req, res, next) => {
         req.keyStore = keyStore;
         return next()
     } catch (error) {
+        console.log("Check err: ", error);
         throw error
     }
 })

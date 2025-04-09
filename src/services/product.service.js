@@ -3,7 +3,7 @@
 const { product, electronic, clothing, furniture } = require("../models/product.model");
 const { BadRequestError } = require("../core/error.response");
 const { findAllDraftsForShop, findAllPublishForShop, publishProductByShop, unPublishProductByShop, searchProduct, findAllProduct, findOneProduct, updateProductById } = require("../models/repositories/product.repo");
-const { removeUndefinedObject } = require("../utils");
+const { insertIntory } = require("../models/repositories/inventory.repo");
 
 class ProductFactory {
 
@@ -77,7 +77,11 @@ class Product {
     }
 
     async createProduct({ product_id }) {
-        return product.create({ _id: product_id, ...this })
+        const newProduct = product.create({ _id: product_id, ...this })
+        if (newProduct) {
+            await insertIntory({ productId: product_id, shopId: this.product_shop, stock: this.product_quantity, });
+        }
+        return newProduct
     }
 
     async updateProduct({ productId, payload }) {

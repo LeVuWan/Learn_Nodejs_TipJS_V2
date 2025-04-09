@@ -3,11 +3,11 @@ const { SuccessRespone, OK, CREATED } = require("../core/success.response")
 
 class DiscountController {
     createDiscountCode = async (req, res, next) => {
-        const result = await DiscountService.createDiscountCode({ ...req.body, shopId });
+        const result = await DiscountService.createDiscountCode({ ...req.body, shopId: req.user.userId });
         new CREATED({
             message: "Create code sucsess",
             metadata: result
-        })
+        }).send(res)
     }
 
     getAllDiscountCode = async (req, res, next) => {
@@ -19,7 +19,7 @@ class DiscountController {
         new OK({
             message: "Get discount success",
             metadata: result
-        })
+        }).send(res)
     }
 
     getDiscountAmount = async (req, res, next) => {
@@ -31,30 +31,33 @@ class DiscountController {
         new OK({
             message: "Get discount success",
             metadata: result
-        })
+        }).send(res)
     }
 
     getAllDiscountCodeWithProduct = async (req, res, next) => {
         const result = await DiscountService.getAllDiscountCodeWithProduct({
-            ...req.query,
+            code: req.query.code,
+            shopId: req.user.userId,
+            limit: req.query.limit,
+            page: req.query.page
         })
 
         new OK({
             message: "Get discount success",
             metadata: result
-        })
+        }).send(res)
     }
 
-    getAllDiscountCode = async (req, res, next) => {
-        const result = await DiscountService.getDiscountAmount({
-            ...req.query,
+    deleteDiscountCode = async (req, res, next) => {
+        const result = await DiscountService.deleteDiscountCode({
+            codeId: req.query.code,
             shopId: req.user.userId
         })
 
-        new OK({
-            message: "Get discount success",
+        new SuccessRespone({
+            message: "Delete discount success",
             metadata: result
-        })
+        }).send(res)
     }
 }
 

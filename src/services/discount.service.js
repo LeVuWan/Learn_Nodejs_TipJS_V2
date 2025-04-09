@@ -1,4 +1,4 @@
-const { BadRequestError } = require("../core/error.response");
+const { BadRequestError, NotFoundError } = require("../core/error.response");
 const discountModel = require("../models/discount.model");
 const { findAllDiscountSelect, findAllDiscountUnselect, checkDiscountExist } = require("../models/repositories/discount.repo");
 const { findAllProduct } = require("../models/repositories/product.repo");
@@ -10,21 +10,30 @@ class DiscountService {
             startDay, endDay, useCount, maxUse, maxUsePerUser,
             minOrderValue, shopId, appliesTo, productIds } = payload;
 
-        if (new Date() < new Date(startDay) || new Date > new Date(endDay)) {
-            throw new BadRequestError("Discount has expried")
+        const now = new Date();
+
+        if (now < new Date(startDay)) {
+            throw new BadRequestError("Discount has not started yet");
+        }
+
+        if (now > new Date(endDay)) {
+            throw new BadRequestError("Discount has expired");
         }
 
         if (new Date(startDay) > new Date(endDay)) {
+            console.log("Check date 2");
             throw new BadRequestError("Start date muse be before end date")
         }
 
         const foundDiscount = await discountModel.findOne({
             discount_code: code,
-            discount_shop_id: convertToObjId(shopId)
+            discount_shop_id: shopId
         })
 
-        if (foundDiscount || foundDiscount.discount_is_active) {
-            throw new BadRequestError("Discount exists!")
+        if (foundDiscount) {
+            if (foundDiscount.discount_is_active) {
+                throw new BadRequestError("Discount exists!")
+            }
         }
 
         const newDiscount = await discountModel.create({
@@ -49,7 +58,7 @@ class DiscountService {
     }
 
     static async getAllDiscountCodeWithProduct({
-        code, shopId, userId, limit, page
+        code, shopId, limit, page
     }) {
         const discountExist = await discountModel.findOne({
             discount_code: code,
@@ -57,7 +66,7 @@ class DiscountService {
         }).lean()
 
         if (!discountExist || !discountExist.discount_is_active) {
-            throw new BadRequestError("Discount not exist")
+            throw new NotFoundError("Discount not exist")
         }
 
         const { discount_applies_to, discount_product_id } = discountExist;
@@ -66,17 +75,19 @@ class DiscountService {
 
         if (discount_applies_to === "all") {
             products = await findAllProduct({
-                filter: { product_shop: convertToObjId(shopId), isPublished: true },
+                filter: { product_shop: shopId, isPublished: true },
                 limit: +limit,
                 page: +page,
                 sort: "ctime",
-                select: ["_id", "product_name"],
+                select: ["product_name"],
             })
         }
 
         if (discount_applies_to === "specific") {
             products = await findAllProduct({
-                filter: { $in: discount_product_id },
+                filter: {
+                    _id: { $in: discount_product_id }
+                },
                 limit: +limit,
                 page: page,
                 sort: "ctime",
@@ -89,9 +100,9 @@ class DiscountService {
 
     static async getAllDiscountCodeByShopId({
         shopId, limit, page
-    }) {
+    }) {        
         const discounts = await findAllDiscountUnselect({
-            filter: { discount_shop_id: convertToObjId(shopId), discount_is_active: true },
+            filter: { discount_shop_id: (shopId), discount_is_active: true },
             unselect: ["__v, discount_shop_id"],
             limit: +limit,
             page: +page,
@@ -103,7 +114,7 @@ class DiscountService {
     static async getDiscountAmount({ code, userId, shopId, products }) {
         const foundDiscount = await checkDiscountExist({
             discount_code: code,
-            discount_shop_id: convertToObjId(shopId)
+            discount_shop_id: (shopId)
         })
 
         if (!foundDiscount) {

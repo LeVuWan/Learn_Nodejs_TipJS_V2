@@ -18,7 +18,7 @@ class CartService {
         }
 
         return await createUserCart({ userId: userId, product: product });
-    }
+    } 
 
     static async deleteUserCart({ userId, productId }) {
         const query = {
@@ -43,6 +43,10 @@ class CartService {
                 cart_userId: userId,
             })
             .lean();
+    }
+
+    static async updateCart ({}) {
+        
     }
 }
 
